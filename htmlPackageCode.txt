@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-Time Sensor Data</title>
+    <!-- Include Bulma CSS Framework -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="#">
+                <strong>Sensor Dashboard</strong>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <section class="section">
+        <div class="container">
+            <h1 class="title has-text-centered">Real-Time Sensor Data</h1>
+
+            <!-- Sensor Data Box -->
+            <div class="box">
+                <h2 class="subtitle">Sensor Output:</h2>
+                <div id="data-container" class="content has-background-light has-text-black p-4">
+                    <!-- Dynamic sensor data values with static labels -->
+                </div>
+                <p id="timestamp" class="has-text-right mt-2 is-size-7 has-text-grey">Last updated: --</p>
+            </div>
+
+            <!-- Event Log Box -->
+            <div class="box">
+                <h2 class="subtitle">Event Log:</h2>
+                <div id="event-log-container" class="content has-background-light has-text-black p-4">
+                    <!-- Event logs will appear here -->
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>
+                <strong>Sensor Dashboard</strong> by <a href="#">Your Name</a>. Powered by Raspberry Pi and Bulma.
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Real-Time Data Display with Synchronization -->
+    <script>
+        let lines = []; // Array to store sensor data lines
+        let charIndices = []; // Array to track character positions for each line
+        const displayDelay = 100; // Delay between character updates (in milliseconds)
+
+        // Function to fetch sensor data and event log from files
+        async function fetchData() {
+            try {
+                // Fetch sensor data
+                const response = await fetch("sensor_data.txt");
+                const text = await response.text();
+                const newLines = text.split("\n").filter(line => line.trim() !== ""); // Remove empty lines
+
+                // Only update the DOM if new data is available
+                if (JSON.stringify(newLines) !== JSON.stringify(lines)) {
+                    lines = newLines;
+                    charIndices = new Array(lines.length).fill(0); // Reset character positions
+                    populateStaticLabels(lines);
+                }
+
+                // Fetch event log data
+                const logResponse = await fetch("event_log.txt");
+                const logText = await logResponse.text();
+                populateEventLog(logText); // Display event log content
+                updateTimestamp(); // Update timestamp whenever data is fetched
+            } catch (error) {
+                const dataContainer = document.getElementById("data-container");
+                dataContainer.textContent = "Error loading data!";
+            }
+        }
+
+        // Populate static labels and placeholders for sensor values
+        function populateStaticLabels(dataLines) {
+            const dataContainer = document.getElementById("data-container");
+            dataContainer.innerHTML = ""; // Clear existing content
+
+            dataLines.forEach((line, index) => {
+                const colonIndex = line.indexOf(":");
+ if (colonIndex !== -1) {
+                    const label = line.substring(0, colonIndex + 1); // Static label
+                    const value = line.substring(colonIndex + 1).trim(); // Placeholder for dynamic value
+
+                    // Create a container for each label and dynamic value
+                    const lineContainer = document.createElement("div");
+                    lineContainer.className = "line-container";
+                    lineContainer.innerHTML = `
+                        <strong>${label}</strong>
+                        <span id="value-${index}" class="value"></span>
+                    `;
+                    dataContainer.appendChild(lineContainer);
+                }
+            });
+        }
+
+        // Display all sensor values incrementally, keeping labels static
+        async function updateValues() {
+            for (let index = 0; index < lines.length; index++) {
+                const line = lines[index];
+                const colonIndex = line.indexOf(":");
+                if (colonIndex !== -1) {
+                    const value = line.substring(colonIndex + 1).trim(); // Dynamic value
+                    const valueElement = document.getElementById(`value-${index}`);
+                    if (valueElement) {
+                        let charIndex = 0;
+                        while (charIndex <= value.length) {
+                            valueElement.textContent = value.substring(0, charIndex);
+                            charIndex++;
+                            await new Promise(resolve => setTimeout(resolve, displayDelay));
+                        }
+                    }
+                }
+            }
+        }
+
+        // Populate the event log on the webpage
+        function populateEventLog(logText) {
+            const logContainer = document.getElementById("event-log-container");
+            logContainer.innerHTML = ""; // Clear existing content
+
+            // Split the log text by lines and display them
+            const logLines = logText.split("\n").filter(line => line.trim() !== "");
+            logLines.forEach(line => {
+ const logItem = document.createElement("div");
+                logItem.className = "log-item";
+                logItem.textContent = line;
+                logContainer.appendChild(logItem);
+            });
+        }
+
+        // Update the timestamp
+        function updateTimestamp() {
+            const timestampElement = document.getElementById("timestamp");
+            const now = new Date();
+            const formattedTimestamp = now.toLocaleString("en-US", { hour12: true });
+            timestampElement.textContent = `Last updated: ${formattedTimestamp}`;
+        }
+
+        // Main update loop to fetch data and animate values
+        async function updateLoop() {
+            while (true) {
+                await fetchData();
+                await updateValues();
+            }
+        }
+        // Start the update loop
+        updateLoop();
+    </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+Acceleration: X: 0.26, Y: -0.14, Z: 8.38 m/s^2
+Temperature: 20.29 Degrees Celsius
+Gyro: X: 0.21 Y: -0.47 Z: 0.46 rad/s
+
+
+Acceleration: X: 0.14, Y: -0.44, Z: 8.56 m/s^2
+Temperature: 20.62 Degrees Celsius
+Gyro: X: -0.03 Y: 0.01 Z: -1.17 rad/s
+
+
+Acceleration: X: -8.17, Y: 0.11, Z: 2.83 m/s^2
+Temperature: 20.67 Degrees Celsius
+Gyro: X: 0.28 Y: 2.10 Z: -0.08 rad/s
+
+
+Acceleration: X: -7.16, Y: 0.53, Z: 3.61 m/s^2
+Temperature: 20.81 Degrees Celsius
+Gyro: X: 0.10 Y: -0.77 Z: 0.04 rad/s
+
+
+Acceleration: X: 6.16, Y: -0.01, Z: 6.22 m/s^2
+Temperature: 20.77 Degrees Celsius
+Gyro: X: -0.21 Y: 0.11 Z: -0.01 rad/s
+
+
+Acceleration: X: 1.31, Y: 1.26, Z: 10.53 m/s^2
+Temperature: 20.91 Degrees Celsius
+Gyro: X: 0.15 Y: 2.38 Z: 0.01 rad/s
+
+
+Acceleration: X: -0.93, Y: -1.53, Z: 8.31 m/s^2
+Temperature: 20.72 Degrees Celsius
+Gyro: X: 0.18 Y: 1.08 Z: -0.03 rad/s
+
+
+Acceleration: X: -7.66, Y: 0.46, Z: 4.26 m/s^2
+Temperature: 21.00 Degrees Celsius
+Gyro: X: -0.04 Y: -0.05 Z: -0.03 rad/s
+
+
+Acceleration: X: 0.51, Y: 1.03, Z: 8.78 m/s^2
+Temperature: 21.00 Degrees Celsius
+Gyro: X: -0.27 Y: -0.83 Z: 0.14 rad/s
+

@@ -1,0 +1,86 @@
+import time
+import board
+import adafruit_mpu6050
+import serial
+
+# Establishes an I2C connection between Raspberry Pico and Raspberry Zero
+i2c = board.I2C()
+mpu = adafruit_mpu6050.MPU6050(i2c)
+
+# Initialize serial connection for Pico and Arduino
+pico_serial = serial.Serial('/dev/ttyACM0', 9600, timeout=1)  # Raspberry Pi Pico connection
+
+# Path to save data for the web page
+output_file = "/var/www/html/sensor_data.txt"
+
+# Thresholds
+ACC_THRESHOLD = 3.0  # g
+GYRO_THRESHOLD = 300  # degrees/second
+
+# Event log file
+log_file = "/var/www/html/sensor_data.txt"
+# Function to check thresholds and detect events for acceleration and gyro
+def check_thresholds(accel, gyro):
+    accel_g = [a / 9.8 for a in accel]  # Convert m/s^2 to g
+    threshold_triggered = False
+    if (
+        abs(accel_g[0]) > ACC_THRESHOLD or
+        abs(accel_g[1]) > ACC_THRESHOLD or
+        abs(accel_g[2]) > ACC_THRESHOLD or
+        abs(gyro[0]) > GYRO_THRESHOLD or
+        abs(gyro[1]) > GYRO_THRESHOLD or
+        abs(gyro[2]) > GYRO_THRESHOLD
+    ):
+        threshold_triggered = True
+    return threshold_triggered
+
+# Function to log events
+def log_event(message):
+    with open(event_log_file, "a") as log_file:
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        log_file.write(f"{timestamp} - {message}\n")
+
+# Main loop
+sensorInput = input("Type 'run' to view data\n")
+
+while True:
+    if sensorInput.lower() == "run":
+        pico_serial.write((sensorInput + '\n').encode())
+
+        # Get light sensor data from Pico (if any)
+        response = pico_serial.readline().decode('utf-8').strip()
+
+        # Read MPU6050 data (acceleration, gyro, and temperature)
+        acceleration = mpu.acceleration
+        gyro = mpu.gyro
+        temperature = mpu.temperature
+
+        # Check for threshold events (acceleration and gyro)
+        threshold_triggered = check_thresholds(acceleration, gyro)
+
+        # Get the lux sensor value from Arduino and determine if the box is open or closed
+
+        # Prepare data for output
+        data = (
+            f"Light Sensor Data: {response}\n"
+            f"Acceleration: X: {acceleration[0]:.2f}, Y: {acceleration[1]:.2f}, Z: {acceleration[2]:.2f} m/s^2\n"
+            f"Temperature: {temperature:.2f} Degrees Celsius\n"
+            f"Gyro: X: {gyro[0]:.2f}, Y: {gyro[1]:.2f}, Z: {gyro[2]:.2f} rad/s\n"
+        )
+
+        # Log events if thresholds are exceeded
+        if threshold_triggered:
+            data += "ALERT: Threshold exceeded! Potential event detected.\n"
+            log_event("Threshold exceeded: Motion detected (accel/gyro)")
+
+
+        # Write the data to the file for the web page
+        with open(output_file, "w") as file:
+            file.write(data)
+        # Print data to the terminal
+        print(data)
+        # Pause for a while before the next reading
+        time.sleep(5)
+    else:
+        print("Command not recognized! Please try again!")
+

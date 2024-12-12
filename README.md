@@ -42,8 +42,6 @@ Libraries to Install (Follow Step by Step Guide Below on Installation):
 * From SourceCode/html Add "index.html" to a folder on your Raspberry Zero var/www/html/index.html
 * Once this code has been uploaded you can now run a file in SourceCode/pythonCode/finalizedCode titled "mainProgram.py" on your Raspberry Pi Zero. 
 
- 
-
 Extra Information: 
 
-Link to [YouTube Video](YouTubeVideo)
+Link to [YouTube Video](https://youtu.be/E0emrvPqTsI)

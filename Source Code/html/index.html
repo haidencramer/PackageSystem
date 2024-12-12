@@ -1,2 +1,218 @@
 <!-- This is hosted Locally On Apache -->
 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-Time Sensor Data</title>
+    <!-- Include Bulma CSS Framework -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <style>
+        /* Style for the collapsible arrow */
+        .collapsible-arrow {
+            cursor: pointer;
+            float: right;
+            font-size: 1.2rem;
+            transform: rotate(0deg);
+            transition: transform 0.2s;
+        }
+        .collapsible-arrow.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        /* Box Status Colors */
+        #box-status {
+            width: 100%;
+            height: 50px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        #box-status.green {
+            background-color: green;
+        }
+        #box-status.yellow {
+            background-color: yellow;
+            color: black;
+        }
+        #box-status.red {
+            background-color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar is-primary">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="#">
+                <strong>Sensor Dashboard</strong>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <section class="section">
+        <div class="container">
+            <h1 class="title has-text-centered">Real-Time Sensor Data</h1>
+
+            <!-- Box Status -->
+            <div class="box">
+                <h2 class="subtitle">Box Status:</h2>
+                <div id="box-status" class="green">Good</div>
+            </div>
+
+            <!-- Sensor Data Box -->
+            <div class="box">
+                <h2 class="subtitle">Sensor Output:</h2>
+                <div id="data-container" class="content has-background-light has-text-black p-4">
+                    <!-- Dynamic sensor data values with static labels -->
+                </div>
+                <p id="timestamp" class="has-text-right mt-2 is-size-7 has-text-grey">Last updated: --</p>
+            </div>
+
+            <!-- Event Log Box -->
+            <div class="box">
+                <h2 class="subtitle">Event Log:
+                    <span id="toggle-event-log" class="collapsible-arrow">&#9662;</span>
+                </h2>
+                <div id="event-log-container" class="content has-background-light has-text-black p-4">
+                    <!-- Event logs will appear here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>
+                <strong>Package Sensor Dashboard</strong> by <a href="#">Haiden Cramer and Eric Frazer</a>. Powered by Raspberry Pi and Bulma.
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Real-Time Data Display with Synchronization -->
+    <script>
+        let lines = []; // Array to store sensor data lines
+
+        const displayDelay = 100; // Delay between character updates (in milliseconds)
+
+        // Function to fetch sensor data and event log from files
+        async function fetchData() {
+            try {
+                // Fetch sensor data
+                const response = await fetch("sensor_data.txt");
+                const text = await response.text();
+                const newLines = text.split("\n").filter(line => line.trim() !== ""); // Remove empty lines
+
+                // Only update the DOM if new data is available
+                if (JSON.stringify(newLines) !== JSON.stringify(lines)) {
+                    lines = newLines;
+                    populateStaticLabels(lines);
+                }
+
+                // Fetch event log data
+                const logResponse = await fetch("event_log.txt");
+                const logText = await logResponse.text();
+                populateEventLog(logText); // Displays event log content
+                updateBoxStatus(logText); // Updates box status
+                updateTimestamp(); // Updates timestamp whenever data is fetched from mainProgram.py
+            } catch (error) {
+                const dataContainer = document.getElementById("data-container");
+                dataContainer.textContent = "Error loading data!";
+                console.error("Fetch error:", error);
+            }
+        }
+
+        // Populate static labels and placeholders for sensor values
+        function populateStaticLabels(dataLines) {
+            const dataContainer = document.getElementById("data-container");
+            dataContainer.innerHTML = ""; // Clear existing content
+
+            dataLines.forEach((line, index) => {
+                const colonIndex = line.indexOf(":");
+                if (colonIndex !== -1) {
+                    const label = line.substring(0, colonIndex + 1); // Static label
+                    const value = line.substring(colonIndex + 1).trim(); // Placeholder for dynamic value
+
+                    // Creates a container for each label and dynamic value green, yellow, and red
+                    const lineContainer = document.createElement("div");
+                    lineContainer.className = "line-container";
+                    lineContainer.innerHTML = `
+                        <strong>${label}</strong>
+                        <span id="value-${index}" class="value">${value}</span>
+                    `;
+                    dataContainer.appendChild(lineContainer);
+                }
+            });
+        }
+
+        // Populates the event log on the webpage we made
+        function populateEventLog(logText) {
+            const logContainer = document.getElementById("event-log-container");
+            logContainer.innerHTML = ""; // Clear existing content when you close application
+
+            // Split the log text by lines and display them
+            const logLines = logText.split("\n").filter(line => line.trim() !== "");
+            logLines.forEach(line => {
+                const logItem = document.createElement("div");
+                logItem.className = "log-item";
+                logItem.textContent = line;
+                logContainer.appendChild(logItem);
+            });
+        }
+
+        // Updates the box status based on the event log triggering
+        function updateBoxStatus(logText) {
+            const boxStatus = document.getElementById("box-status");
+
+            if (logText.includes("Light Sensor")) {
+                boxStatus.textContent = "Box Opened (Tampered)";
+                boxStatus.className = "red";
+            } else if (logText.includes("MPU6050")) {
+                boxStatus.textContent = "Box Status Unknown (Movement Detected)";
+                boxStatus.className = "yellow";
+            } else {
+                boxStatus.textContent = "Good";
+                boxStatus.className = "green";
+            }
+        }
+
+ // Updates the timestamp
+ function updateTimestamp() {
+            const timestampElement = document.getElementById("timestamp");
+            const now = new Date();
+            const formattedTimestamp = now.toLocaleString("en-US", { hour12: true });
+            timestampElement.textContent = `Last updated: ${formattedTimestamp}`;
+        }
+
+        // Toggle the Event Log visibility
+        document.getElementById("toggle-event-log").addEventListener("click", () => {
+            const logContainer = document.getElementById("event-log-container");
+            const toggleArrow = document.getElementById("toggle-event-log");
+
+            if (logContainer.style.display === "none") {
+                logContainer.style.display = "block";
+                toggleArrow.classList.remove("collapsed");
+            } else {
+                logContainer.style.display = "none";
+                toggleArrow.classList.add("collapsed");
+            }
+        });
+
+        // Main update loop to fetch data
+        async function updateLoop() {
+            while (true) {
+                await fetchData();
+                await new Promise(resolve => setTimeout(resolve, 5000)); // Fetch every 5 seconds
+            }
+        }
+
+        // Start the update loop
+        updateLoop();
+    </script>
+</body>
+</html>

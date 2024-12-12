@@ -18,6 +18,11 @@ Libraries to Install:
 * CircuitPy
 * Apache (To Host Data Site Locally)
 
+**Running this System Step by Step:**
+
+* After obtaining all of the components listed above I will guide you through step-by-step on what you need to do in order to successfully use this system. 
+
+
 Extra Information: 
 
 Link to [YouTube Video](YouTubeVideo)

@@ -32,11 +32,12 @@ Libraries to Install (Follow Step by Step Guide Below on Installation):
 
     (For Arduino < 1.5.x) Extract the archive to <Your User Directory>/My Documents/Arduino/libraries/ folder and rename it to hp_BH1750. Restart IDE.
 
-* Install Gyro/Accel/Temp Library on Rapberry Zero: pip3 install adafruit-circuitpython-mpu6050
+* Install Gyro/Accel/Temp Library on Rapberry Zero: 
+    - pip3 install adafruit-circuitpython-mpu6050
 
 * Install Apache and Start Server Locally with Raspberry Zero: 
-    sudo apt install apache2
-    sudo service apache2 start
+    - sudo apt install apache2
+    - sudo service apache2 start
 
 * After ensuring all dependencies are downloaded you can now upload the light sensor reader in SourceOde/finalizedArduino titled "lightData.ino" to your Raspberry Pico. 
 * From SourceCode/html Add "index.html" to a folder on your Raspberry Zero var/www/html/index.html

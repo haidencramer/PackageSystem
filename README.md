@@ -1,6 +1,6 @@
 # The Package Guys
 
-*** Haiden Cramer and Eric Frazer ***
+**Haiden Cramer and Eric Frazer**
 
 
 Components Used: 
@@ -20,4 +20,4 @@ Libraries to Install:
 
 Extra Information: 
 
-Link to (YouTube Video)[YouTube Video]
+Link to [YouTube Video](YouTube Video)
